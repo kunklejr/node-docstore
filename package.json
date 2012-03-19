@@ -1,0 +1,20 @@
+{
+  "author": "Jeff Kunkle <jeff.kunkle@nearinfinity.com>",
+  "name": "lockbox",
+  "description": "Extremely secure document-oriented data store",
+  "version": "0.0.0",
+  "repository": {
+    "url": ""
+  },
+  "scripts": {
+    "test": "expresso"
+  },
+  "engines": {
+    "node": "~0.6.1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "~0.5.1",
+    "expresso": "~0.9.2"
+  }
+}
