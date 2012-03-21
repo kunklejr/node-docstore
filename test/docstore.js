@@ -18,7 +18,7 @@ describe('docstore', function () {
     } catch (e) {
       fs.mkdirSync(docdir);
     }
-  })
+  });
 
   describe('#open', function () {
     it('should create the document directory if it does not exist', function (done) {
@@ -27,7 +27,7 @@ describe('docstore', function () {
         expect(store.docdir).to.equal(docdir);
         done();
       });
-    })
+    });
 
     it('should open an existing directory', function(done) {
       ds.open(docdir, function(err, store) {
@@ -35,7 +35,7 @@ describe('docstore', function () {
         expect(store.docdir).to.equal(docdir);
         done();
       });
-    })
+    });
 
     it('should invoke the callback with an error if the provided directory is a file', function(done) {
       var file = path.join(__dirname, __filename);
@@ -43,8 +43,8 @@ describe('docstore', function () {
         expect(err).to.exist;
         done();
       });
-    })
-  })
+    });
+  });
 
   describe('#save', function() {
     it('should generate a key value if not provided one', function (done) {
@@ -55,7 +55,7 @@ describe('docstore', function () {
           done();
         });
       });
-    })
+    });
 
     it('should use the given key if provided one', function(done) {
       ds.open(docdir, function(err, store) {
@@ -66,7 +66,7 @@ describe('docstore', function () {
           done();
         });
       });
-    })
+    });
 
     it('should create a new json file if an existing one does not exist', function(done) {
       ds.open(docdir, function(err, store) {
@@ -79,9 +79,9 @@ describe('docstore', function () {
           });
         });
       });
-    })
+    });
 
-    it('overwrite an existing json file', function(done) {
+    it('should overwrite an existing json file', function(done) {
       ds.open(docdir, function(err, store) {
         store.save(null, { create: true }, function(err, key) {
           expect(err).to.not.exist;
@@ -95,8 +95,96 @@ describe('docstore', function () {
           });
         });
       });
-    })
+    });
+  });
 
-  })
+  describe('#get', function() {
+    it('should invoke callback with JSON structure if key exists', function(done) {
+      ds.open(docdir, function(err, store) {
+        store.save(null, { success: true }, function(err, key) {
+          store.get(key, function(err, obj) {
+            expect(err).to.not.exist;
+            expect(obj).to.exist;
+            expect(obj.success).to.be.true;
+            done();
+          });
+        });
+      });
+    });
+
+    it('should invoke callback with error if key does not exist', function(done) {
+      ds.open(docdir, function(err, store) {
+        store.save(null, { success: true }, function(err, key) {
+          store.get(key + 'asdf', function(err, obj) {
+            expect(err).to.exist;
+            expect(obj).to.not.exist;
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  describe('#remove', function() {
+    it('should invoke callback with no args if remove succeeds', function(done) {
+      ds.open(docdir, function(err, store) {
+        store.save(null, { success: true }, function(err, key) {
+          store.remove(key, function(err) {
+            expect(err).to.not.exist;
+            done();
+          });
+        });
+      });
+    });
+
+    it('should invoke callback with an error if remove fails', function(done) {
+      ds.open(docdir, function(err, store) {
+        store.remove('bogus key', function(err) {
+          expect(err).to.exist;
+          done();
+        });
+      });
+    });
+  });
+
+  describe('#clear', function() {
+    it('should invoke callback with no args if clear removes all files', function(done) {
+      ds.open(docdir, function(err, store) {
+        store.save(null, { success: true }, function(err, key) {
+          expect(err).to.not.exist;
+          fs.readdir(docdir, function(err, files) {
+            expect(err).to.not.exist;
+            expect(files).to.not.be.empty;
+            store.clear(function(err) {
+              expect(err).to.not.exist;
+              fs.readdir(docdir, function(err, files) {
+                expect(err).to.not.exist;
+                expect(files).to.be.empty;
+                done();
+              });
+            });
+          });
+        });
+      });
+    });
+
+    it('should invoke callback with no args if clear has no files to remove', function(done) {
+      ds.open(docdir, function(err, store) {
+        store.clear(function(err) {
+          expect(err).to.not.exist;
+          store.clear(function(err) {
+            expect(err).to.not.exist;
+            fs.readdir(docdir, function(err, files) {
+              expect(err).to.not.exist;
+              expect(files).to.be.empty;
+              done();
+            });
+          });
+        });
+      });
+    });
+    it('should invoke callback with an error if clear fails');
+  });
+
 });
 
