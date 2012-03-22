@@ -183,8 +183,80 @@ describe('docstore', function () {
         });
       });
     });
+
     it('should invoke callback with an error if clear fails');
   });
 
+  describe('#scan', function() {
+    describe('with a callback argument', function() {
+      it('should invoke the callback with all files that return true from the filter function', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'scan'), function(err, store) {
+          var filter = function(doc) {
+            return doc.filter === true;
+          };
+          store.scan(filter, function(err, docs) {
+            expect(err).to.not.exist;
+            expect(docs).to.exist;
+            expect(docs).to.have.length(2);
+            done();
+          });
+        });
+      });
+
+      it('should invoke the callback with an empty array of files if none are filtered', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'scan'), function(err, store) {
+          var filter = function(doc) {
+            return doc.filter === 7;
+          };
+          store.scan(filter, function(err, docs) {
+            expect(err).to.not.exist;
+            expect(docs).to.exist;
+            expect(docs).to.be.empty;
+            done();
+          });
+        });
+      });
+
+      it('should invoke the callback with an empty array if no files exist', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'empty'), function(err, store) {
+          var filter = function(doc) {
+            return doc.filter === 7;
+          };
+          store.scan(filter, function(err, docs) {
+            expect(err).to.not.exist;
+            expect(docs).to.exist;
+            expect(docs).to.be.empty;
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  describe('#all', function() {
+    describe('with a callback argument', function() {
+      it('should invoke the callback with all files that return true from the filter function', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'scan'), function(err, store) {
+          store.all(function(err, docs) {
+            expect(err).to.not.exist;
+            expect(docs).to.exist;
+            expect(docs).to.have.length(3);
+            done();
+          });
+        });
+      });
+
+      it('should invoke the callback with an empty array if no files are found', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'empty'), function(err, store) {
+          store.all(function(err, docs) {
+            expect(err).to.not.exist;
+            expect(docs).to.exist;
+            expect(docs).to.be.empty;
+            done();
+          });
+        });
+      });
+    });
+  });
 });
 
