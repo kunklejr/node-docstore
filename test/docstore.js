@@ -231,11 +231,63 @@ describe('docstore', function () {
         });
       });
     });
+
+    describe('using the document stream', function() {
+      it('should emit a document event for all docs that return true from the filter function', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'scan'), function(err, store) {
+          var filter = function(doc) {
+            return doc.filter === true;
+          };
+          var stream = store.scan(filter);
+          stream.on('document', function(doc) {
+            expect(doc.filter).to.be.true;
+          });
+          stream.on('error', function(doc) {
+            throw new Error('error event should not be emitted');
+          });
+          stream.on('end', done);
+        });
+      });
+
+      it('should emit only the end event if none are filtered', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'scan'), function(err, store) {
+          var filter = function(doc) {
+            return doc.filter === 7;
+          };
+          var stream = store.scan(filter);
+          stream.on('document', function(doc) {
+            throw new Error('document event should not be emitted');
+          });
+          stream.on('error', function(doc) {
+            throw new Error('error event should not be emitted');
+          });
+          stream.on('end', done);
+        });
+      });
+
+      it('should emit only the end event if no files exist', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'empty'), function(err, store) {
+          var filter = function(doc) {
+            return doc.filter === 7;
+          };
+          var stream = store.scan(filter);
+          stream.on('document', function(doc) {
+            throw new Error('document event should not be emitted');
+          });
+          stream.on('error', function(doc) {
+            throw new Error('error event should not be emitted');
+          });
+          stream.on('end', done);
+        });
+      });
+
+      it('should emit an error event on any failure');
+    });
   });
 
   describe('#all', function() {
     describe('with a callback argument', function() {
-      it('should invoke the callback with all files that return true from the filter function', function(done) {
+      it('should invoke the callback with all files', function(done) {
         ds.open(path.join(__dirname, 'documents', 'scan'), function(err, store) {
           store.all(function(err, docs) {
             expect(err).to.not.exist;
@@ -256,6 +308,40 @@ describe('docstore', function () {
           });
         });
       });
+    });
+
+    describe('using the stream', function() {
+      it('should emit the document event for all files', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'scan'), function(err, store) {
+          var stream = store.all();
+          var count = 0;
+          stream.on('document', function(doc) {
+            ++count;
+          });
+          stream.on('error', function(doc) {
+            throw new Error('error event should not be emitted');
+          });
+          stream.on('end', function() {
+            expect(count).to.equal(3);
+            done();
+          });
+        });
+      });
+
+      it('should emit only the end event if no files are found', function(done) {
+        ds.open(path.join(__dirname, 'documents', 'empty'), function(err, store) {
+          var stream = store.all();
+          stream.on('document', function(doc) {
+            throw new Error('document event should not be emitted');
+          });
+          stream.on('error', function(doc) {
+            throw new Error('error event should not be emitted');
+          });
+          stream.on('end', done);
+        });
+      });
+
+      it('should emit an error event on any failure');
     });
   });
 });
