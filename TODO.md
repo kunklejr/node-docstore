@@ -1,4 +1,3 @@
-1. Make the data formatting and parsing pluggable
 2. Make ids an internally managed thing
 3. Add 'open' event to docstore
 4. Add 'save' event to store
