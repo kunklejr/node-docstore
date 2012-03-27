@@ -43,6 +43,19 @@ describe('docstore', function () {
         done();
       });
     });
+
+    it('should emit an open event whenever a store is opened', function(done) {
+      var s = null;
+      ds.on('open', function(store) {
+        expect(store.docdir).to.equal(s.docdir);
+        done();
+      });
+      ds.open(docdir, function(err, store) {
+        expect(err).to.not.exist;
+        expect(store).to.exist;
+        s = store;
+      });
+    });
   });
 });
 
