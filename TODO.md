@@ -1,4 +1,3 @@
-2. Make ids an internally managed thing
 3. Add 'open' event to docstore
 4. Add 'save' event to store
 5. Add 'remove' event to store

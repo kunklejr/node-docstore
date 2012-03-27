@@ -22,9 +22,9 @@ describe('store', function () {
   describe('#save', function() {
     it('should generate a key value if not provided one', function (done) {
       var store = new Store(docdir);
-      store.save(null, { create: true }, function(err, key) {
+      store.save({ create: true }, function(err, obj) {
         expect(err).to.not.exist;
-        expect(key).to.exist;
+        expect(obj.key).to.exist;
         done();
       });
     });
@@ -32,18 +32,19 @@ describe('store', function () {
     it('should use the given key if provided one', function(done) {
       var store = new Store(docdir);
       var randKey = Math.random().toString().replace('.', '');
-      store.save(randKey, { create: true }, function(err, key) {
+      var obj = { create :true, key: randKey };
+      store.save(obj, function(err, obj) {
         expect(err).to.not.exist;
-        expect(key).to.equal(randKey);
+        expect(obj.key).to.equal(randKey);
         done();
       });
     });
 
     it('should create a new json file if an existing one does not exist', function(done) {
       var store = new Store(docdir);
-      store.save(null, { create: true }, function(err, key) {
+      store.save({ create: true }, function(err, obj) {
         expect(err).to.not.exist;
-        fs.stat(path.join(docdir, key + '.json'), function(err, stat) {
+        fs.stat(path.join(docdir, obj.key + '.json'), function(err, stat) {
           expect(err).to.not.exist;
           expect(stat.isFile()).to.be.true;
           done();
@@ -53,12 +54,13 @@ describe('store', function () {
 
     it('should overwrite an existing json file', function(done) {
       var store = new Store(docdir);
-      store.save(null, { create: true }, function(err, key) {
+      store.save({ create: true }, function(err, obj) {
         expect(err).to.not.exist;
-        store.save(key, { create: false }, function(err, secondKey) {
+        obj.create = false;
+        store.save(obj, function(err, secondObj) {
           expect(err).to.not.exist;
-          expect(secondKey).to.equal(key);
-          var str = fs.readFileSync(path.join(docdir, key + '.json'));
+          expect(secondObj.key).to.equal(obj.key);
+          var str = fs.readFileSync(path.join(docdir, obj.key + '.json'));
           var json = JSON.parse(str);
           expect(json.create).to.be.false;
           done();
@@ -70,8 +72,8 @@ describe('store', function () {
   describe('#get', function() {
     it('should invoke callback with JSON structure if key exists', function(done) {
       var store = new Store(docdir);
-      store.save(null, { success: true }, function(err, key) {
-        store.get(key, function(err, obj) {
+      store.save({ success: true }, function(err, obj) {
+        store.get(obj.key, function(err, obj) {
           expect(err).to.not.exist;
           expect(obj).to.exist;
           expect(obj.success).to.be.true;
@@ -82,8 +84,8 @@ describe('store', function () {
 
     it('should invoke callback with error if key does not exist', function(done) {
       var store = new Store(docdir);
-      store.save(null, { success: true }, function(err, key) {
-        store.get(key + 'asdf', function(err, obj) {
+      store.save({ success: true }, function(err, obj) {
+        store.get(obj.key + 'asdf', function(err, obj) {
           expect(err).to.exist;
           expect(obj).to.not.exist;
           done();
@@ -95,8 +97,8 @@ describe('store', function () {
   describe('#remove', function() {
     it('should invoke callback with no args if remove succeeds', function(done) {
       var store = new Store(docdir);
-      store.save(null, { success: true }, function(err, key) {
-        store.remove(key, function(err) {
+      store.save({ success: true }, function(err, obj) {
+        store.remove(obj.key, function(err) {
           expect(err).to.not.exist;
           done();
         });
@@ -115,7 +117,7 @@ describe('store', function () {
   describe('#clear', function() {
     it('should invoke callback with no args if clear removes all files', function(done) {
       var store = new Store(docdir);
-      store.save(null, { success: true }, function(err, key) {
+      store.save({ success: true }, function(err, obj) {
         expect(err).to.not.exist;
         fs.readdir(docdir, function(err, files) {
           expect(err).to.not.exist;
