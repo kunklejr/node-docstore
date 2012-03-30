@@ -100,19 +100,6 @@ describe('store', function () {
         });
       });
     });
-
-    it('should emit a save event after saving an object', function(done) {
-      var store = new Store(docdir);
-      var obj = { create: true };
-      store.on('save', function(obj) {
-        expect(obj.create).to.be.true;
-        done();
-      });
-      store.save(obj, function(err, obj) {
-        expect(err).to.not.exist;
-        expect(obj.create).to.be.true;
-      });
-    });
   });
 
   describe('#get', function() {
@@ -138,22 +125,6 @@ describe('store', function () {
         });
       });
     });
-
-    it('should emit a get event whenever an object is retrieved', function(done) {
-      var store = new Store(docdir);
-      var obj = { success: true };
-      store.save(obj, function(err, obj) {
-        store.on('get', function(obj) {
-          expect(obj.success).to.be.true;
-          done();
-        });
-        store.get(obj.key, function(err, obj) {
-          expect(err).to.not.exist;
-          expect(obj).to.exist;
-          expect(obj.success).to.be.true;
-        });
-      });
-    });
   });
 
   describe('#remove', function() {
@@ -172,20 +143,6 @@ describe('store', function () {
       store.remove('bogus key', function(err) {
         expect(err).to.exist;
         done();
-      });
-    });
-
-    it('should emit a remove event whenever an object is removed', function(done) {
-      var store = new Store(docdir);
-      var obj = { success: true };
-      store.save(obj, function(err, obj) {
-        store.on('remove', function(key) {
-          expect(key).to.equal(obj.key);
-        });
-        store.remove(obj.key, function(err) {
-          expect(err).to.not.exist;
-          done();
-        });
       });
     });
   });
