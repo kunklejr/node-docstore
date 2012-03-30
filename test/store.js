@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var expect = require('chai').expect;
 var Store = require('../lib/store');
+var jsonFormat = require('../lib/format/json');
 var docdir = path.join(__dirname, '..', 'tmp');
 
 describe('store', function () {
@@ -17,6 +18,38 @@ describe('store', function () {
     } catch (e) {
       fs.mkdirSync(docdir);
     }
+  });
+
+  describe('#new', function() {
+    it('should default the format to json if none is provided in the options', function(done) {
+      var store = new Store(docdir);
+      expect(store.format).to.equal(jsonFormat);
+      store = new Store(docdir, { bogus: true });
+      expect(store.format).to.equal(jsonFormat);
+      done();
+    });
+
+    it('should use the format specified in the options', function(done) {
+      var format = {
+        extension: '.test',
+        stringify: function(json) {
+          return '1';
+        },
+        parse: function(str) {
+          return { ret: str.toString() };
+        }
+      };
+
+      var store = new Store(docdir, { format: format });
+      expect(store.format).to.equal(format);
+
+      store.save({}, function(err, obj) {
+        store.get(obj.key, function(err, obj) {
+          expect(obj.ret).to.equal('1');
+          done();
+        });
+      });
+    });
   });
 
   describe('#save', function() {
@@ -169,6 +202,9 @@ describe('store', function () {
             expect(err).to.not.exist;
             fs.readdir(docdir, function(err, files) {
               expect(err).to.not.exist;
+              var files = files.filter(function(f) {
+                return f.lastIndexOf(store.format.extension) > -1;
+              });
               expect(files).to.be.empty;
               done();
             });
@@ -185,6 +221,9 @@ describe('store', function () {
           expect(err).to.not.exist;
           fs.readdir(docdir, function(err, files) {
             expect(err).to.not.exist;
+            var files = files.filter(function(f) {
+              return f.lastIndexOf(store.format.extension) > -1;
+            });
             expect(files).to.be.empty;
             done();
           });
