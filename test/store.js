@@ -32,10 +32,10 @@ describe('store', function () {
     it('should use the format specified in the options', function(done) {
       var format = {
         extension: '.test',
-        stringify: function(json) {
+        serialize: function(json) {
           return '1';
         },
-        parse: function(str) {
+        deserialize: function(str) {
           return { ret: str.toString() };
         }
       };
