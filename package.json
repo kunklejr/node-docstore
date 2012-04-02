@@ -1,10 +1,15 @@
 {
   "author": "Jeff Kunkle <jeff.kunkle@nearinfinity.com>",
-  "name": "lockbox",
-  "description": "Extremely secure document-oriented data store",
-  "version": "0.0.0",
+  "name": "docstore",
+  "description": "Simple and extendable JSON document storage and retrieval",
+  "keywords": ["json", "database", "nosql", "couch", "couchdb"],
+  "version": "0.0.1",
+  "bugs": { "url": "https://github.com/nearinfinity/node-docstore/issues" },
+  "license": "MIT",
+  "main": "./lib/docstore.js",
   "repository": {
-    "url": ""
+    "type": "git",
+    "url": "https://github.com/nearinfinity/node-docstore.git"
   },
   "scripts": {
     "test": "mocha"
