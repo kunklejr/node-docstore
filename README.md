@@ -245,15 +245,15 @@ __Arguments__
   algorithms.
 * password - used to derive key and initialization vector (IV)
 * underlyingFormat - the underling format for serializing and
-  deserializing JavaScript objects
+  deserializing JavaScript objects. If no underlying format is given the
+  default JSON format implementation will be used.
 
 __Example__
 
 ```javascript
 var ds = require('docstore');
-var json = require('docstore/format/json');
-var Encrypted = require('docstore/format/encrypted');
-var encrypted = new Encrypted('aes128', 'password', json);
+var Encrypted = require('docstore/lib/format/encrypted');
+var encrypted = new Encrypted('aes128', 'password');
 
 ds.open('./docs/users', { format: encrypted }, function(err, store) {
   console.log('You now have an encrypted store');
