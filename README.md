@@ -26,8 +26,8 @@ ds.open('./docs/users', function(err, store) {
 ## Opening
 
 The first step to using docstore is to open a store. All other
-operations are available from the store returned to you via the callback
-passed.
+operations are available from the store returned to you via the passed
+callback.
 
 ### open(directory, options, callback)
 
@@ -63,7 +63,7 @@ first serialize the object. If the object has a `key` property it's
 value will be used as the filename. Otherwise, a random filename will be
 generated.
 
-### save(obj, callback)
+### store.save(obj, callback)
 
 __Arguments__
 
@@ -85,7 +85,7 @@ store.save({ name: 'Joe', age: 35 }, function(err, doc) {
 
 Any document can be retrieved given its key.
 
-### get(key, callback)
+### store.get(key, callback)
 
 __Arguments__
 
@@ -108,7 +108,7 @@ store.get('key12302202', function(err, doc) {
 There are two methods for removing documents. You can remove them one at
 a time or clear all documents from a store at once.
 
-### remove(key, callback)
+### store.remove(key, callback)
 
 __Arguments__
 
@@ -125,7 +125,7 @@ store.remove('key12302202', function(err) {
 });
 ```
 
-### clear(callback)
+### store.clear(callback)
 
 __Arguments__
 
@@ -148,7 +148,7 @@ collection. While there's only one scan method, it can be used in two
 ways. You can either get a single callback with all the results as an
 array or get them as a stream of document events.
 
-### clear(callback)
+### store.clear(callback)
 
 __Arguments__
 
@@ -182,6 +182,82 @@ stream.on('document', function(doc) {
 });
 stream.on('end', console.log.bind(null, 'Done'));
 stream.on('error', console.error.bind(null));
+```
+
+## Custom Formats
+
+As mentioned above, the `docstore.open` function accepts an options
+object, one option of which is `format`. A format object is used by the
+store to serialize an object before writing it to disk and deserializing
+it after reading from disk. It's up to you to decide how it should be
+represented on disk. A default JSON formatter is used if you don't
+specify one. It stores documentas as plain text JSON.
+
+Writing your own custom format is easy, requiring only one property to
+be present and two methods to be implemented.
+
+### extension
+
+`extension` is a property used to indicate the file extension to use for
+your format. It should include a leading `.`, such as `.json` for JSON
+formatted files.
+
+### serialize(obj)
+
+The serialize method is called to format a JavaScript object as it is to
+be represented on disk. It must return the serialized form of the
+object.
+
+### deserialize(buffer)
+
+The deserialize method is called to format a buffer read from disk back
+into its JavaScript object form. It must return a JavaScript object.
+
+__Example Format__
+
+```javascript
+exports.extension = '.json';
+
+exports.serialize = function (obj) {
+  return JSON.stringify(obj);
+};
+
+exports.deserialize = function (buffer) {
+  return JSON.parse(buffer);
+};
+```
+
+## Encryption
+
+`docstore` includes a format object that can be used to encrypt the
+files stored on disk. It simply wraps another format object in an
+encrypted form. While it's intended to be able to transparently encrypt
+any underlying format, it's only been tested with the default JSON
+format.
+
+### constructor(algorithm, password, underlyingFormat)
+
+__Arguments__
+
+* algorithm - the encryption algorithm to use. The available algorithms
+  is dependent on your version of OpenSSL. On recent releases,
+  `openssl list-cipher-algorithms` will display the available cipher
+  algorithms.
+* password - used to derive key and initialization vector (IV)
+* underlyingFormat - the underling format for serializing and
+  deserializing JavaScript objects
+
+__Example__
+
+```javascript
+var ds = require('docstore');
+var json = require('docstore/format/json');
+var Encrypted = require('docstore/format/encrypted');
+var encrypted = new Encrypted('aes128', 'password', json);
+
+ds.open('./docs/users', { format: encrypted }, function(err, store) {
+  console.log('You now have an encrypted store');
+});
 ```
 
 ## License
