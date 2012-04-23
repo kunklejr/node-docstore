@@ -125,6 +125,20 @@ describe('store', function () {
         });
       });
     });
+
+    it('should always set the key to match the filename, regardless of key value on disk', function(done) {
+      var key = Math.random();
+      var doc = JSON.stringify({ key: 'invalid', success: true });
+      fs.writeFileSync(path.join(docdir, key + '.json'), doc);
+
+      var store = new Store(docdir);
+      store.get(key, function(err, obj) {
+        expect(err).to.not.exist;
+        expect(obj.key).to.equal(key);
+        expect(obj.success).to.be.true;
+        done();
+      });
+    });
   });
 
   describe('#remove', function() {
