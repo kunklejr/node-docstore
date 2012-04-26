@@ -50,6 +50,19 @@ describe('store', function () {
         });
       });
     });
+
+    it('should provide a default key generation strategy', function(done) {
+      var store = new Store(docdir);
+      expect(store.generateKey).to.exist;
+      done();
+    });
+
+    it('should use the key generation function specified in the options', function(done) {
+      var func = new function() { return 'newkey' };
+      var store = new Store(docdir, { keygen: func });
+      expect(store.generateKey.toString()).to.equal(func.toString());
+      done();
+    });
   });
 
   describe('#save', function() {
