@@ -354,7 +354,9 @@ describe('store', function () {
         var store = new Store('');
         var filter = function(doc) { return true; }
         var stream = store.scan(filter);
-        stream.on('error', done);
+        stream.on('error', function(err) {
+          done();
+        });
       });
     });
   });
@@ -422,7 +424,9 @@ describe('store', function () {
       it('should emit an error event on any failure', function(done) {
         var store = new Store('');
         var stream = store.all();
-        stream.on('error', done);
+        stream.on('error', function(err) {
+          done();
+        });
       });
     });
   });
