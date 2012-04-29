@@ -44,44 +44,44 @@ describe('store', function () {
       expect(store.format).to.equal(format);
 
       store.save({}, function(err, obj) {
-        store.get(obj.key, function(err, obj) {
+        store.get(obj._id, function(err, obj) {
           expect(obj.ret).to.equal('1');
           done();
         });
       });
     });
 
-    it('should provide a default key generation strategy', function(done) {
+    it('should provide a default id generation strategy', function(done) {
       var store = new Store(docdir);
-      expect(store.generateKey).to.exist;
+      expect(store.generateId).to.exist;
       done();
     });
 
-    it('should use the key generation function specified in the options', function(done) {
-      var func = new function() { return 'newkey' };
-      var store = new Store(docdir, { keygen: func });
-      expect(store.generateKey.toString()).to.equal(func.toString());
+    it('should use the id generation function specified in the options', function(done) {
+      var func = new function() { return 'new_id' };
+      var store = new Store(docdir, { idgen: func });
+      expect(store.generateId.toString()).to.equal(func.toString());
       done();
     });
   });
 
   describe('#save', function() {
-    it('should generate a key value if not provided one', function (done) {
+    it('should generate a id value if not provided one', function (done) {
       var store = new Store(docdir);
       store.save({ create: true }, function(err, obj) {
         expect(err).to.not.exist;
-        expect(obj.key).to.exist;
+        expect(obj._id).to.exist;
         done();
       });
     });
 
-    it('should use the given key if provided one', function(done) {
+    it('should use the given id if provided one', function(done) {
       var store = new Store(docdir);
-      var randKey = Math.random().toString().replace('.', '');
-      var obj = { create :true, key: randKey };
+      var randId = Math.random().toString().replace('.', '');
+      var obj = { create :true, '_id': randId };
       store.save(obj, function(err, obj) {
         expect(err).to.not.exist;
-        expect(obj.key).to.equal(randKey);
+        expect(obj._id).to.equal(randId);
         done();
       });
     });
@@ -90,7 +90,7 @@ describe('store', function () {
       var store = new Store(docdir);
       store.save({ create: true }, function(err, obj) {
         expect(err).to.not.exist;
-        fs.stat(path.join(docdir, obj.key + '.json'), function(err, stat) {
+        fs.stat(path.join(docdir, obj._id + '.json'), function(err, stat) {
           expect(err).to.not.exist;
           expect(stat.isFile()).to.be.true;
           done();
@@ -105,8 +105,8 @@ describe('store', function () {
         obj.create = false;
         store.save(obj, function(err, secondObj) {
           expect(err).to.not.exist;
-          expect(secondObj.key).to.equal(obj.key);
-          var str = fs.readFileSync(path.join(docdir, obj.key + '.json'));
+          expect(secondObj._id).to.equal(obj._id);
+          var str = fs.readFileSync(path.join(docdir, obj._id + '.json'));
           var json = JSON.parse(str);
           expect(json.create).to.be.false;
           done();
@@ -116,10 +116,10 @@ describe('store', function () {
   });
 
   describe('#get', function() {
-    it('should invoke callback with JSON structure if key exists', function(done) {
+    it('should invoke callback with JSON structure if id exists', function(done) {
       var store = new Store(docdir);
       store.save({ success: true }, function(err, obj) {
-        store.get(obj.key, function(err, obj) {
+        store.get(obj._id, function(err, obj) {
           expect(err).to.not.exist;
           expect(obj).to.exist;
           expect(obj.success).to.be.true;
@@ -128,10 +128,10 @@ describe('store', function () {
       });
     });
 
-    it('should invoke callback with error if key does not exist', function(done) {
+    it('should invoke callback with error if id does not exist', function(done) {
       var store = new Store(docdir);
       store.save({ success: true }, function(err, obj) {
-        store.get(obj.key + 'asdf', function(err, obj) {
+        store.get(obj._id + 'asdf', function(err, obj) {
           expect(err).to.exist;
           expect(obj).to.not.exist;
           done();
@@ -139,15 +139,15 @@ describe('store', function () {
       });
     });
 
-    it('should always set the key to match the filename, regardless of key value on disk', function(done) {
-      var key = Math.random();
-      var doc = JSON.stringify({ key: 'invalid', success: true });
-      fs.writeFileSync(path.join(docdir, key + '.json'), doc);
+    it('should always set the id to match the filename, regardless of id value on disk', function(done) {
+      var id = Math.random();
+      var doc = JSON.stringify({ '_id': 'invalid', success: true });
+      fs.writeFileSync(path.join(docdir, id + '.json'), doc);
 
       var store = new Store(docdir);
-      store.get(key, function(err, obj) {
+      store.get(id, function(err, obj) {
         expect(err).to.not.exist;
-        expect(obj.key).to.equal(key);
+        expect(obj._id).to.equal(id);
         expect(obj.success).to.be.true;
         done();
       });
@@ -158,7 +158,7 @@ describe('store', function () {
     it('should invoke callback with no args if remove succeeds', function(done) {
       var store = new Store(docdir);
       store.save({ success: true }, function(err, obj) {
-        store.remove(obj.key, function(err) {
+        store.remove(obj._id, function(err) {
           expect(err).to.not.exist;
           done();
         });
@@ -167,7 +167,7 @@ describe('store', function () {
 
     it('should invoke callback with an error if remove fails', function(done) {
       var store = new Store(docdir);
-      store.remove('bogus key', function(err) {
+      store.remove('bogus id', function(err) {
         expect(err).to.exist;
         done();
       });
@@ -223,7 +223,7 @@ describe('store', function () {
           expect(err).to.not.exist;
           done();
         });
-        fs.unlinkSync(path.join(docdir, obj.key + store.format.extension));
+        fs.unlinkSync(path.join(docdir, obj._id + store.format.extension));
       });
     });
 
@@ -286,7 +286,7 @@ describe('store', function () {
             expect(err).to.not.exist;
             done();
           });
-          fs.unlinkSync(path.join(store.docdir, obj.key + store.format.extension));
+          fs.unlinkSync(path.join(store.docdir, obj._id + store.format.extension));
         });
       });
     });
@@ -346,7 +346,7 @@ describe('store', function () {
             throw new Error('no error expected');
           });
           stream.on('end', done);
-          fs.unlinkSync(path.join(store.docdir, obj.key + store.format.extension));
+          fs.unlinkSync(path.join(store.docdir, obj._id + store.format.extension));
         });
       });
 
