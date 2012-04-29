@@ -215,7 +215,26 @@ describe('store', function () {
       });
     });
 
-    it('should invoke callback with an error if clear fails');
+    it('should not fail if a file to be cleared has already been removed', function(done) {
+      var store = new Store(docdir);
+      store.save({ success: true }, function(err, obj) {
+        expect(err).to.not.exist;
+        store.clear(function(err) {
+          expect(err).to.not.exist;
+          done();
+        });
+        fs.unlinkSync(path.join(docdir, obj.key + store.format.extension));
+      });
+    });
+
+    it('should invoke callback with an error if clear fails', function(done) {
+      var store = new Store('');
+      store.clear(function(err) {
+        expect(err).to.exist;
+        done();
+      });
+    });
+
   });
 
   describe('#scan', function() {
@@ -256,6 +275,18 @@ describe('store', function () {
           expect(docs).to.exist;
           expect(docs).to.be.empty;
           done();
+        });
+      });
+
+      it('should not throw an exception if a file to be scanned has been removed', function(done) {
+        var store = new Store(path.join(__dirname, 'documents', 'scan'));
+        store.save({ deleteme: true }, function(err, obj) {
+          var filter = function(doc) { return true; }
+          store.scan(filter, function(err, docs) {
+            expect(err).to.not.exist;
+            done();
+          });
+          fs.unlinkSync(path.join(store.docdir, obj.key + store.format.extension));
         });
       });
     });
@@ -306,7 +337,25 @@ describe('store', function () {
         stream.on('end', done);
       });
 
-      it('should emit an error event on any failure');
+      it('should not emit an error if a file to be scanned has been removed', function(done) {
+        var store = new Store(path.join(__dirname, 'documents', 'scan'));
+        store.save({ deleteme: true }, function(err, obj) {
+          var filter = function(doc) { return true; }
+          var stream = store.scan(filter);
+          stream.on('error', function(err) {
+            throw new Error('no error expected');
+          });
+          stream.on('end', done);
+          fs.unlinkSync(path.join(store.docdir, obj.key + store.format.extension));
+        });
+      });
+
+      it('should emit an error event on any failure', function(done) {
+        var store = new Store('');
+        var filter = function(doc) { return true; }
+        var stream = store.scan(filter);
+        stream.on('error', done);
+      });
     });
   });
 
@@ -328,6 +377,14 @@ describe('store', function () {
           expect(err).to.not.exist;
           expect(docs).to.exist;
           expect(docs).to.be.empty;
+          done();
+        });
+      });
+
+      it('should invoke the callback with an error if any occurs', function(done) {
+        var store = new Store('');
+        store.all(function(err, docs) {
+          expect(err).to.exist;
           done();
         });
       });
@@ -362,7 +419,11 @@ describe('store', function () {
         stream.on('end', done);
       });
 
-      it('should emit an error event on any failure');
+      it('should emit an error event on any failure', function(done) {
+        var store = new Store('');
+        var stream = store.all();
+        stream.on('error', done);
+      });
     });
   });
 });
