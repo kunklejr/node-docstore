@@ -114,6 +114,16 @@ describe('store', function () {
       });
     });
 
+    it('should invoke callback with error if save fails', function(done) {
+      var store = new Store(path.join(__dirname, 'store-test.js'));
+      store.save({ success: true }, function(err, obj) {
+        expect(err).to.exist;
+        expect(obj).to.exist;
+        expect(obj.success).to.be.true;
+        done();
+      });
+    });
+
     it('should emit a save event with a undefined error when successful', function(done) {
       var store = new Store(docdir);
       store.save({ create: true }, function(err, obj) {});
@@ -125,6 +135,17 @@ describe('store', function () {
       });
     });
 
+    it('should emit a save event with an error when failing', function(done) {
+      var store = new Store(path.join(__dirname, 'store-test.js'));
+      var obj = { create: true };
+      store.save(obj, function(err, obj) {});
+      store.once('save', function(err, obj) {
+        expect(err).to.exist;
+        expect(obj).to.exist;
+        expect(obj.create).to.be.true;
+        done();
+      });
+    });
   });
 
   describe('#get', function() {
@@ -143,9 +164,11 @@ describe('store', function () {
     it('should invoke callback with error if id does not exist', function(done) {
       var store = new Store(docdir);
       store.save({ success: true }, function(err, obj) {
-        store.get(obj._id + 'asdf', function(err, obj) {
+        var badId = obj._id + 'asdf';
+        store.get(badId, function(err, obj) {
           expect(err).to.exist;
-          expect(obj).to.not.exist;
+          expect(obj).to.exist;
+          expect(obj).to.equal(badId);
           done();
         });
       });
@@ -205,8 +228,10 @@ describe('store', function () {
 
     it('should invoke callback with an error if remove fails', function(done) {
       var store = new Store(docdir);
-      store.remove('bogus id', function(err) {
+      store.remove('bogus id', function(err, id) {
         expect(err).to.exist;
+        expect(id).to.exist;
+        expect(id).to.equal('bogus id');
         done();
       });
     });
