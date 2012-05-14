@@ -113,6 +113,18 @@ describe('store', function () {
         });
       });
     });
+
+    it('should emit a save event with a undefined error when successful', function(done) {
+      var store = new Store(docdir);
+      store.save({ create: true }, function(err, obj) {});
+      store.once('save', function(err, obj) {
+        expect(err).to.not.exist;
+        expect(obj).to.exist;
+        expect(obj.create).to.be.true;
+        done();
+      });
+    });
+
   });
 
   describe('#get', function() {
@@ -152,6 +164,32 @@ describe('store', function () {
         done();
       });
     });
+
+    it('should emit a get event with an undefined error when successful', function(done) {
+      var store = new Store(docdir);
+      store.save({ success: true }, function(err, obj) {
+        store.get(obj._id, function(err, obj) {});
+        store.once('get', function(err, obj) {
+          expect(err).to.not.exist;
+          expect(obj).to.exist;
+          expect(obj.success).to.be.true;
+          done();
+        });
+      });
+    });
+
+    it('should emit a get event with an error when failing', function(done) {
+      var store = new Store(docdir);
+      store.save({ success: true }, function(err, obj) {
+        var badId = obj._id + 'asdf';
+        store.get(badId, function(err, obj) {});
+        store.once('get', function(err, id) {
+          expect(err).to.exist;
+          expect(id).to.equal(badId);
+          done();
+        });
+      });
+    });
   });
 
   describe('#remove', function() {
@@ -169,6 +207,29 @@ describe('store', function () {
       var store = new Store(docdir);
       store.remove('bogus id', function(err) {
         expect(err).to.exist;
+        done();
+      });
+    });
+
+    it('should emit a remove event with an undefined error when successful', function(done) {
+      var store = new Store(docdir);
+      store.save({ success: true }, function(err, obj) {
+        store.remove(obj._id, function(err) {});
+        store.once('remove', function(err, id) {
+          expect(err).to.not.exist;
+          expect(id).to.exist;
+          expect(id).to.equal(obj._id);
+          done();
+        });
+      });
+    });
+
+    it('should emit a remove event with an error when failing', function(done) {
+      var store = new Store(docdir);
+      store.remove('bogus id', function(err) {});
+      store.once('remove', function(err, id) {
+        expect(err).to.exist;
+        expect(id).to.equal('bogus id');
         done();
       });
     });
