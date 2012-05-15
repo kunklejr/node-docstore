@@ -44,11 +44,23 @@ describe('docstore', function () {
       });
     });
 
-    it('should cause an open event to be emitted', function(done) {
+    it('should cause an open event to be emitted with an undefined error when successful', function(done) {
       ds.open(docdir, function(err, store) {});
-      ds.once('open', function(store) {
+      ds.once('open', function(err, store) {
+        expect(err).to.not.exist;
         expect(store).to.exist;
         expect(store.docdir).to.equal(docdir);
+        done();
+      });
+    });
+
+    it('should cause an open event to be emitted with an error when failing', function(done) {
+      var dir = path.join(__dirname, 'docstore-test.js');
+      ds.open(dir, function(err, docdir) {});
+      ds.once('open', function(err, docdir) {
+        expect(err).to.exist;
+        expect(docdir).to.exist;
+        expect(docdir).to.equal(dir);
         done();
       });
     });

@@ -38,6 +38,11 @@ __Arguments__
 * callback(err, store) - callback that will be invoked after opening the
   store
 
+__Events__
+
+* open(err, store) - event emitted when a store is successfully opened
+* open(err, docdir) - event emitted when opening a store fails
+
 __Example__
 
 ```javascript
@@ -55,6 +60,8 @@ The following options are available when opening a store
 
 * format - the format class to use for serializing and deserializing
   objects. It defaults to the JSON formatter in lib/format/json.js
+* idgen - custom function for generting object ids. It defaults to the
+  generator in lib/idgen.js
 
 ## Saving
 
@@ -71,6 +78,10 @@ __Arguments__
 * callback(err, obj) - callback that will be invoked after opening the
   store. It is passed an error if one occurs. If no error occurs it will
   pass the object as saved (with it's generated id).
+
+__Events__
+
+* save(err, object) - event emitted when an object is saved, error or not
 
 __Example__
 
@@ -94,6 +105,11 @@ __Arguments__
   document. It is passed an error if one occurs. If no error occurs it will
   pass the document.
 
+__Events__
+
+* get(err, object) - event emitted when an object is successfully retrieved
+* get(err, id) - event emitted when an object retrieval fails
+
 __Example__
 
 ```javascript
@@ -115,6 +131,11 @@ __Arguments__
 * id - the id of the object to remove
 * callback(err) - callback that will be invoked after removing the
   document. It is passed an error if one occurs.
+
+__Events__
+
+* remove(err, id) - event emitted when an object is removed, regardless
+  of failure or success
 
 __Example__
 
