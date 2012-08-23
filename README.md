@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/nearinfinity/node-docstore.png)](http://travis-ci.org/nearinfinity/node-docstore)
 # docstore
 
 Simple and extendable JSON document storage and retrieval
